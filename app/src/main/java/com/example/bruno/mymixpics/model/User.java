@@ -1,4 +1,4 @@
-package com.example.bruno.mymixpics;
+package com.example.bruno.mymixpics.model;
 
 /**
  * Created by Bruno on 12/1/2015.

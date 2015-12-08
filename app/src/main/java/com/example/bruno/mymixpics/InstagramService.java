@@ -1,14 +1,30 @@
 package com.example.bruno.mymixpics;
 
-import java.util.List;
+import com.example.bruno.mymixpics.model.Profile;
+import com.example.bruno.mymixpics.model.Recent;
+import com.example.bruno.mymixpics.model.User;
 
+import retrofit.Call;
 import retrofit.http.GET;
 import retrofit.http.Path;
+import retrofit.http.Query;
 
 /**
  * Created by Bruno on 12/2/2015.
  */
 public interface InstagramService {
-    @GET("users/{user-id}/media/recent/?access_token=491862971.e29b7a3.56886123b030410bb65a56f86c5d1731")
-    User getUser (@Path("user-id") String userId);
+    @GET("users/{user_id}/media/recent/")
+    Call<Recent> getRecent(
+            @Path("user_id") String userId,
+            @Query("access_token") String accessToken,
+            @Query("count") Integer count,
+            @Query("min_id") String minId,
+            @Query("max_id") String maxId,
+            @Query("min_timestamp") Long minTimestamp,
+            @Query("max_timestamp") Long maxTimestamp);
+
+    @GET("users/{user-id}/")
+    Call<Profile> getProfile (
+            @Path("user-id") String userId,
+            @Query("access_token") String accessToken);
 }
