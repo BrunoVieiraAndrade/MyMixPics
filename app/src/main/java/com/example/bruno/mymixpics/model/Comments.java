@@ -10,7 +10,7 @@ public class Comments {
     private Integer count;
     private List<Comment> data;
 
-    public int getCount() {
+    public Integer getCount() {
         return count;
     }
 

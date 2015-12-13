@@ -15,16 +15,6 @@ import retrofit.Response;
 public class FetchInstagramRecentData extends AsyncTask<Call<Recent>, Void, Response<Recent>> {
 
 
-    public interface AsyncResponse {
-        void processFinish(Response<Recent> output);
-    }
-
-    public AsyncResponse delegate = null;
-
-    public FetchInstagramRecentData(AsyncResponse delegate){
-        this.delegate = delegate;
-    }
-
     @Override
     protected Response<Recent> doInBackground(Call<Recent>... params) {
 
@@ -39,7 +29,9 @@ public class FetchInstagramRecentData extends AsyncTask<Call<Recent>, Void, Resp
     }
 
     @Override
-    protected void onPostExecute(Response<Recent> result) {
-        delegate.processFinish(result);
+    protected void onPostExecute(Response<Recent> recentResponse) {
+        super.onPostExecute(recentResponse);
     }
+
+
 }

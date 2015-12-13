@@ -1,35 +1,93 @@
 package com.example.bruno.mymixpics;
 
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.example.bruno.mymixpics.model.Profile;
+import com.example.bruno.mymixpics.model.Media;
 import com.example.bruno.mymixpics.model.Recent;
-import com.squareup.picasso.Picasso;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import retrofit.Call;
 import retrofit.GsonConverterFactory;
-import retrofit.Response;
 import retrofit.Retrofit;
 
 public class MainActivity extends ActionBarActivity {
 
-    final private String userId = "368085031";
-    @Bind(R.id.textView)
-    TextView textView;
-    @Bind(R.id.imageView)
-    ImageView imageView;
+    @Bind(R.id.cardList)
+    RecyclerView recyclerView;
+    @Bind(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout swipeRefreshLayout;
+
+    final private String userId = "43915154";
+    private RecyclerViewAdapter recyclerViewAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        try {
+            recyclerViewAdapter = new RecyclerViewAdapter(getApplicationContext(), getData());
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                try {
+                    refreshItems();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+    }
+
+    void refreshItems() throws ExecutionException, InterruptedException {
+
+        List<Media> data = getData();
+        onItemsLoadComplete(data);
+    }
+
+    void onItemsLoadComplete(List<Media> data) {
+        // Update the adapter and notify data set changed
+        // ...
+        recyclerViewAdapter.setData(data);
+        recyclerViewAdapter.notifyDataSetChanged();
+        // Stop refresh animation
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    public List<Media> getData() throws ExecutionException, InterruptedException {
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.instagram.com/v1/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        InstagramService instagramService = retrofit.create(InstagramService.class);
+        Call<Recent> recentCall = instagramService.getRecent(userId, BuildConfig.ACCESS_TOKEN, 5, null, null, null, null);
+        FetchInstagramRecentData fetchInstagramRecentData = new FetchInstagramRecentData();
+        fetchInstagramRecentData.execute(recentCall);
+        return fetchInstagramRecentData.get().body().getMediaList();
     }
 
     @Override
@@ -47,31 +105,13 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.menu_load) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://api.instagram.com/v1/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-
-            InstagramService instagramService = retrofit.create(InstagramService.class);
-            retrofit.Call<Profile> profileCall = instagramService.getProfile(userId, BuildConfig.ACCESS_TOKEN);
-            final Call<Recent> recentCall = instagramService.getRecent(userId, BuildConfig.ACCESS_TOKEN, 5, null, null, null, null);
-            FetchInstagramRecentData fetchInstagramRecentData = new FetchInstagramRecentData(new FetchInstagramRecentData.AsyncResponse() {
-                @Override
-                public void processFinish(Response<Recent> output) {
-                    Recent recent = output.body();
-                    Picasso.with(getApplicationContext())
-                            .load(recent.getMediaList().get(1).getImages().getStandardResolution().getUrl())
-                            .into(imageView);
-                }
-            });
-            fetchInstagramRecentData.execute(recentCall);
-
+        if (id == R.id.menu_settings) {
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
 
 
 }

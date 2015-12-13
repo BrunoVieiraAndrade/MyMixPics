@@ -27,4 +27,10 @@ public interface InstagramService {
     Call<Profile> getProfile (
             @Path("user-id") String userId,
             @Query("access_token") String accessToken);
+
+    @GET("users/search/")
+    Call<User> getUserByUserName(
+            @Query("q") String userUsername,
+            @Query("access_token") String accessToken);
+
 }

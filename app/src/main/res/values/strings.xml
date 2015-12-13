@@ -1,4 +1,5 @@
 <resources>
-    <string name="app_name">MyMixPics</string>
+    <string name="app_name">My MixPics</string>
     <string name="action_settings">Settings</string>
-</resources>
+
+    </resources>
