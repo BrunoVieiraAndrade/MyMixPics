@@ -53,6 +53,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.captionTextView.setText(current.getUser().getUsername() + ": " + current.getCaption().getText());
         holder.likesTextView.setText(current.getLikes().getCount().toString() + " likes");
         holder.commentTextView.setText(current.getComments().getCount().toString() + " comments");
+        holder.usernameTextView.setText(current.getUser().getUsername());
+        Picasso.with(context).load(current.getUser().getProfilePicture()).into(holder.userProfilePic);
     }
 
     @Override
@@ -62,6 +64,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     class MyViewHolder extends RecyclerView.ViewHolder{
 
+        @Bind(R.id.userProfilePic)
+        ImageView userProfilePic;
+        @Bind(R.id.usernameTextView)
+        TextView usernameTextView;
         @Bind(R.id.imageView)
         ImageView imageView;
         @Bind(R.id.captionTextView)

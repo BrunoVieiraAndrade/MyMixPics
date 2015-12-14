@@ -27,7 +27,7 @@ public class MainActivity extends ActionBarActivity {
     @Bind(R.id.swipeRefreshLayout)
     SwipeRefreshLayout swipeRefreshLayout;
 
-    final private String userId = "43915154";
+    private String userId = "43915154";
     private RecyclerViewAdapter recyclerViewAdapter;
 
     @Override
