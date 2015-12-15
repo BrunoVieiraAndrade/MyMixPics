@@ -34,7 +34,7 @@ public class NoConnectionActivity extends ActionBarActivity {
     }
 
     private boolean isDeviceOnline(Context context) {
-        boolean isConnectionAvail = true;
+        boolean isConnectionAvail = false;
         try {
             ConnectivityManager cm = (ConnectivityManager) context
                     .getSystemService(Context.CONNECTIVITY_SERVICE);

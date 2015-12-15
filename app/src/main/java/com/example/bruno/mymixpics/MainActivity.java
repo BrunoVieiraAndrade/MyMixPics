@@ -21,7 +21,9 @@ import java.util.concurrent.ExecutionException;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import retrofit.Call;
+import retrofit.Callback;
 import retrofit.GsonConverterFactory;
+import retrofit.Response;
 import retrofit.Retrofit;
 
 public class MainActivity extends ActionBarActivity {
@@ -39,16 +41,10 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        try {
-            recyclerViewAdapter = new RecyclerViewAdapter(getApplicationContext(), getData());
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        recyclerViewAdapter = new RecyclerViewAdapter(getApplicationContext());
         recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -62,17 +58,22 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        try {
+            refreshItems();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
     void refreshItems() throws ExecutionException, InterruptedException {
-
         if(isDeviceOnline(getApplicationContext())){
-            List<Media> data = getData();
-            onItemsLoadComplete(data);
-        }
-        else{
-            startNoConnectionActivity();
+            getData();
+        }else {
+            startActivity(new Intent(getApplicationContext(), NoConnectionActivity.class));
+            finish();
         }
 
     }
@@ -86,8 +87,9 @@ public class MainActivity extends ActionBarActivity {
         swipeRefreshLayout.setRefreshing(false);
     }
 
-    public List<Media> getData() throws ExecutionException, InterruptedException {
-        List<Media> data = null;
+
+    public void getData() throws ExecutionException, InterruptedException {
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.instagram.com/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -95,19 +97,17 @@ public class MainActivity extends ActionBarActivity {
 
         InstagramService instagramService = retrofit.create(InstagramService.class);
         Call<Recent> recentCall = instagramService.getRecent(userId, BuildConfig.ACCESS_TOKEN, 5, null, null, null, null);
-        FetchInstagramRecentData fetchInstagramRecentData = new FetchInstagramRecentData();
-        fetchInstagramRecentData.execute(recentCall);
+        recentCall.enqueue(new Callback<Recent>() {
+            @Override
+            public void onResponse(Response<Recent> response, Retrofit retrofit) {
+                onItemsLoadComplete(response.body().getMediaList());//aqui você garante que tem os dados e que o processo terminou
+            }
 
-        // Check the connectivity state
+            @Override
+            public void onFailure(Throwable t) {
 
-        try {
-            data = fetchInstagramRecentData.get().body().getMediaList();
-        } catch (NullPointerException e){
-            startNoConnectionActivity();
-            finish();
-        }
-
-        return data;
+            }
+        });
     }
 
     @Override
@@ -146,11 +146,6 @@ public class MainActivity extends ActionBarActivity {
             e.printStackTrace();
         }
         return isConnectionAvail;
-    }
-
-    private void startNoConnectionActivity(){
-        startActivity(new Intent(this, NoConnectionActivity.class));
-        finish();
     }
 
 }

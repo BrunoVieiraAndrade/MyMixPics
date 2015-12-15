@@ -26,10 +26,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     List<Media> data = Collections.emptyList();
     private LayoutInflater inflater;
 
-    public RecyclerViewAdapter(Context context, List<Media> data) {
+    public RecyclerViewAdapter(Context context) {
         this.context = context;
         inflater = LayoutInflater.from(context);
-        this.data = data;
     }
 
     public void setData(List<Media> data) {
@@ -50,7 +49,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         Media current = data.get(position);
         Picasso.with(context).load(current.getImages().getStandardResolution().getUrl())
                 .into(holder.imageView);
-        holder.captionTextView.setText(current.getCaption().getText());
+        holder.captionTextView.setText(current.getUser().getUsername() + ": " + current.getCaption().getText());
         holder.likesTextView.setText(current.getLikes().getCount().toString() + " likes");
         holder.commentTextView.setText(current.getComments().getCount().toString() + " comments");
         holder.usernameTextView.setText(current.getUser().getUsername());
