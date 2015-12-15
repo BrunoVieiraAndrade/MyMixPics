@@ -1,5 +1,9 @@
 package com.example.bruno.mymixpics;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -63,8 +67,14 @@ public class MainActivity extends ActionBarActivity {
 
     void refreshItems() throws ExecutionException, InterruptedException {
 
-        List<Media> data = getData();
-        onItemsLoadComplete(data);
+        if(isDeviceOnline(getApplicationContext())){
+            List<Media> data = getData();
+            onItemsLoadComplete(data);
+        }
+        else{
+            startNoConnectionActivity();
+        }
+
     }
 
     void onItemsLoadComplete(List<Media> data) {
@@ -77,7 +87,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public List<Media> getData() throws ExecutionException, InterruptedException {
-
+        List<Media> data = null;
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.instagram.com/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -87,7 +97,17 @@ public class MainActivity extends ActionBarActivity {
         Call<Recent> recentCall = instagramService.getRecent(userId, BuildConfig.ACCESS_TOKEN, 5, null, null, null, null);
         FetchInstagramRecentData fetchInstagramRecentData = new FetchInstagramRecentData();
         fetchInstagramRecentData.execute(recentCall);
-        return fetchInstagramRecentData.get().body().getMediaList();
+
+        // Check the connectivity state
+
+        try {
+            data = fetchInstagramRecentData.get().body().getMediaList();
+        } catch (NullPointerException e){
+            startNoConnectionActivity();
+            finish();
+        }
+
+        return data;
     }
 
     @Override
@@ -112,6 +132,25 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private boolean isDeviceOnline(Context context) {
+        boolean isConnectionAvail = false;
+        try {
+            ConnectivityManager cm = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+            if(netInfo != null)
+                return netInfo.isConnected();
+            else
+                return isConnectionAvail;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return isConnectionAvail;
+    }
 
+    private void startNoConnectionActivity(){
+        startActivity(new Intent(this, NoConnectionActivity.class));
+        finish();
+    }
 
 }

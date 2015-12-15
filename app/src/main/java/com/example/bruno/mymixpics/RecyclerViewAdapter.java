@@ -50,7 +50,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         Media current = data.get(position);
         Picasso.with(context).load(current.getImages().getStandardResolution().getUrl())
                 .into(holder.imageView);
-        holder.captionTextView.setText(current.getUser().getUsername() + ": " + current.getCaption().getText());
+        holder.captionTextView.setText(current.getCaption().getText());
         holder.likesTextView.setText(current.getLikes().getCount().toString() + " likes");
         holder.commentTextView.setText(current.getComments().getCount().toString() + " comments");
         holder.usernameTextView.setText(current.getUser().getUsername());

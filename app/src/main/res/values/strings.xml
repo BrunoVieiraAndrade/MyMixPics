@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">My MixPics</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_no_connection">My MixPics</string>
+    <string name="no_connection_text">No Connection. Tap to retry.</string>
 
-    </resources>
+</resources>
