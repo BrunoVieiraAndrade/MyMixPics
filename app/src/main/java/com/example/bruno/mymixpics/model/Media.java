@@ -85,4 +85,7 @@ public class Media {
         return user;
     }
 
+    public Videos getVideos() {
+        return videos;
+    }
 }
